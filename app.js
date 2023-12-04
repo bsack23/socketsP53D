@@ -1,15 +1,25 @@
 // https://medium.com/geekculture/multiplayer-interaction-with-p5js-f04909e13b87
+// we try to add https to our app ...
+// https://dev.to/omergulen/step-by-step-node-express-ssl-certificate-run-https-server-from-scratch-in-5-steps-5b87
 const express = require('express');
 const app = express();
+const fs = require('fs');
+
+const options = {
+  key: fs.readFileSync('rsa.txt'),
+  cert: fs.readFileSync('cert.txt'),
+};
+
+const https = require('https').createServer(options, app);
+
 const http = require('http').createServer(app);
-const io = require('socket.io')(http, {
+
+// make another socket connection for http?
+const io = require('socket.io')(https, {
   transports: ['websocket'], //set to use websocket only
 }); //this loads socket.io and connects it to the server.
-// const io = require('socket.io')();
-// io.on('connection', client => { ... });
-//io.listen(3000);
 
-const port = process.env.PORT || 8080;
+// const port = process.env.PORT || 8080;
 // const port = process.env.PORT || 80;
 
 //this next line makes sure we can put all our html/css/javascript in the public directory
@@ -20,8 +30,12 @@ app.get('/', (req, res) => {
 });
 
 //run the server which uses express
-http.listen(port, () => {
-  console.log(`Server is active at port:${port}`);
+https.listen(8080, () => {
+  console.log(`HTTPS Server is active at port:8080`);
+});
+
+http.listen(3000, () => {
+  console.log(`HTTP Server is active at port:3000`);
 });
 
 //store the positions of each client in this object.
